@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,14 +28,16 @@ import { cn } from "@/lib/utils";
 
 const Booking: React.FC = () => {
   const [date, setDate] = useState<Date | undefined>(undefined);
-  
+
   return (
     <section id="booking" className="py-20 bg-gradient-to-b from-black to-dark">
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto">
           <Card className="bg-dark border border-neon-blue neon-border overflow-hidden">
             <CardHeader className="text-center border-b border-neon-blue/30 bg-black/50">
-              <CardTitle className="text-3xl md:text-4xl font-display neon-text">BOOK YOUR LANE</CardTitle>
+              <CardTitle className="text-3xl md:text-4xl font-display pixelated-text neon-text">
+                BOOK YOUR PIXEL
+              </CardTitle>
               <CardDescription className="text-white/80">
                 Reserve your spot for bowling, karaoke, beer pong, and more
               </CardDescription>
@@ -44,7 +45,9 @@ const Booking: React.FC = () => {
             <CardContent className="p-6 space-y-4 md:p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm text-white/70">Select Location</label>
+                  <label className="text-sm text-white/70">
+                    Select Location
+                  </label>
                   <Select>
                     <SelectTrigger className="bg-black/60 text-white border-neon-blue/50">
                       <SelectValue placeholder="Choose location" />
@@ -59,9 +62,11 @@ const Booking: React.FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <label className="text-sm text-white/70">Select Activity</label>
+                  <label className="text-sm text-white/70">
+                    Select Activity
+                  </label>
                   <Select>
                     <SelectTrigger className="bg-black/60 text-white border-neon-blue/50">
                       <SelectValue placeholder="Choose activity" />
@@ -74,7 +79,7 @@ const Booking: React.FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-sm text-white/70">Select Date</label>
                   <Popover>
@@ -97,7 +102,7 @@ const Booking: React.FC = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
-                
+
                 <div className="space-y-2">
                   <label className="text-sm text-white/70">Select Time</label>
                   <Select>
@@ -119,19 +124,22 @@ const Booking: React.FC = () => {
                   </Select>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <label className="text-sm text-white/70">Group Size</label>
-                <Input 
-                  type="number" 
-                  placeholder="Number of people" 
+                <Input
+                  type="number"
+                  placeholder="Number of people"
                   min="1"
                   className="bg-black/60 text-white border-neon-blue/50"
                 />
               </div>
             </CardContent>
             <CardFooter className="flex justify-center p-6 bg-black/30">
-              <Button size="lg" className="bg-neon-pink hover:bg-neon-blue text-white text-lg font-medium transition-colors duration-300">
+              <Button
+                size="lg"
+                className="bg-neon-pink hover:bg-neon-blue text-white text-lg font-medium transition-colors duration-300"
+              >
                 Book Now
               </Button>
             </CardFooter>
