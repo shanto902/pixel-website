@@ -6,7 +6,7 @@ const Hero: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    // Simple color matching game
+    // Neon Flappy Bird style game
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -20,41 +20,193 @@ const Hero: React.FC = () => {
     // Game variables
     let score = 0;
     let gameActive = true;
-    const colors = ['#ff0099', '#00c3ff', '#ffcc00', '#33ff33', '#ff3333', '#cc66ff'];
-    const targetColor = colors[Math.floor(Math.random() * colors.length)];
+    let gameStarted = false;
+    const gravity = 0.5;
+    const jumpStrength = -8;
     
-    // Falling blocks
-    const blocks: { x: number, y: number, color: string, width: number, speed: number }[] = [];
-    
-    // Create initial blocks
-    const createBlocks = () => {
-      for (let i = 0; i < 15; i++) {
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        blocks.push({
-          x: Math.random() * (canvas.width - 40),
-          y: -50 - (Math.random() * 500), // Start above the canvas at varying heights
-          color: randomColor,
-          width: 30 + Math.random() * 20,
-          speed: 1 + Math.random() * 3
-        });
+    // Bird variables
+    const bird = {
+      x: canvas.width / 3,
+      y: canvas.height / 2,
+      radius: 15,
+      velocity: 0,
+      color: '#ff0099', // Neon pink
+      glowColor: '#ff0099',
+      draw: function() {
+        // Bird body
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+        
+        // Neon glow effect
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius + 2, 0, Math.PI * 2);
+        ctx.strokeStyle = this.glowColor;
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.glowColor;
+        ctx.stroke();
+        ctx.closePath();
+        
+        // Reset shadow for other elements
+        ctx.shadowBlur = 0;
       }
     };
     
-    createBlocks();
+    // Pipe variables
+    const pipes = [];
+    const pipeWidth = 60;
+    const pipeGap = 160;
+    const pipeColors = ['#00c3ff', '#ffcc00', '#33ff33', '#cc66ff']; // Neon colors
+    const minPipeHeight = 50;
+    
+    function createPipe() {
+      const pipeColor = pipeColors[Math.floor(Math.random() * pipeColors.length)];
+      const topPipeHeight = minPipeHeight + Math.random() * (canvas.height - pipeGap - minPipeHeight * 2);
+      
+      pipes.push({
+        x: canvas.width,
+        width: pipeWidth,
+        topHeight: topPipeHeight,
+        bottomY: topPipeHeight + pipeGap,
+        bottomHeight: canvas.height - topPipeHeight - pipeGap,
+        color: pipeColor,
+        glowColor: pipeColor,
+        passed: false
+      });
+    }
+    
+    // Initial pipe
+    setTimeout(createPipe, 1500);
+    
+    // Handle user input
+    function handleClick() {
+      if (!gameStarted) {
+        gameStarted = true;
+      }
+      
+      if (gameActive) {
+        bird.velocity = jumpStrength;
+      } else {
+        // Reset game
+        resetGame();
+      }
+    }
+    
+    function handleKeyPress(e) {
+      if (e.code === 'Space' || e.key === ' ' || e.key === 'ArrowUp') {
+        handleClick();
+      }
+    }
+    
+    canvas.addEventListener('click', handleClick);
+    window.addEventListener('keydown', handleKeyPress);
+    
+    // Reset game function
+    function resetGame() {
+      bird.y = canvas.height / 2;
+      bird.velocity = 0;
+      pipes.length = 0;
+      score = 0;
+      gameActive = true;
+      gameStarted = false;
+      setTimeout(createPipe, 1500);
+    }
+    
+    // Check collisions
+    function checkCollision() {
+      // Floor and ceiling collision
+      if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
+        gameActive = false;
+      }
+      
+      // Pipe collision
+      pipes.forEach(pipe => {
+        // Check if bird is within the x-range of the pipe
+        if (bird.x + bird.radius > pipe.x && bird.x - bird.radius < pipe.x + pipe.width) {
+          // Check if bird hit top pipe
+          if (bird.y - bird.radius < pipe.topHeight) {
+            gameActive = false;
+          }
+          // Check if bird hit bottom pipe
+          if (bird.y + bird.radius > pipe.bottomY) {
+            gameActive = false;
+          }
+        }
+        
+        // Check if bird passed the pipe
+        if (!pipe.passed && bird.x > pipe.x + pipe.width) {
+          score += 1;
+          pipe.passed = true;
+        }
+      });
+    }
     
     // Game loop
     const draw = () => {
-      if (!ctx || !gameActive) return;
+      if (!ctx) return;
       
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Draw target color box at the bottom
-      ctx.fillStyle = targetColor;
-      ctx.fillRect(canvas.width / 2 - 75, canvas.height - 40, 150, 30);
-      ctx.strokeStyle = 'white';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(canvas.width / 2 - 75, canvas.height - 40, 150, 30);
+      // Draw background grid for neon effect
+      drawNeonGrid();
+      
+      // Draw bird
+      bird.draw();
+      
+      // Update bird position if game started
+      if (gameStarted) {
+        bird.velocity += gravity;
+        bird.y += bird.velocity;
+        
+        // Check collisions
+        if (gameActive) {
+          checkCollision();
+        }
+        
+        // Create new pipes
+        if (gameActive && pipes.length > 0 && canvas.width - pipes[pipes.length - 1].x > 220) {
+          createPipe();
+        }
+      }
+      
+      // Draw and update pipes
+      pipes.forEach((pipe, index) => {
+        // Draw top pipe
+        ctx.fillStyle = pipe.color;
+        ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
+        
+        // Draw bottom pipe
+        ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, pipe.bottomHeight);
+        
+        // Add neon glow effect to pipes
+        ctx.strokeStyle = pipe.glowColor;
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = pipe.glowColor;
+        
+        // Stroke top pipe
+        ctx.strokeRect(pipe.x, 0, pipe.width, pipe.topHeight);
+        
+        // Stroke bottom pipe
+        ctx.strokeRect(pipe.x, pipe.bottomY, pipe.width, pipe.bottomHeight);
+        
+        // Reset shadow
+        ctx.shadowBlur = 0;
+        
+        // Move pipe if game is active and started
+        if (gameActive && gameStarted) {
+          pipe.x -= 2;
+        }
+        
+        // Remove pipes that are off screen
+        if (pipe.x + pipe.width < 0) {
+          pipes.splice(index, 1);
+        }
+      });
       
       // Draw score
       ctx.fillStyle = 'white';
@@ -62,64 +214,52 @@ const Hero: React.FC = () => {
       ctx.textAlign = 'center';
       ctx.fillText(`Score: ${score}`, canvas.width / 2, 30);
       
-      // Draw and move blocks
-      blocks.forEach((block, index) => {
-        ctx.fillStyle = block.color;
-        ctx.fillRect(block.x, block.y, block.width, block.width);
-        
-        // Move block down
-        block.y += block.speed;
-        
-        // Check if block reached target zone
-        if (block.y > canvas.height - 40 && block.y < canvas.height - 10) {
-          const blockCenterX = block.x + block.width / 2;
-          if (blockCenterX > canvas.width / 2 - 75 && blockCenterX < canvas.width / 2 + 75) {
-            // Block hit target zone
-            if (block.color === targetColor) {
-              // Correct color match
-              score += 10;
-              blocks.splice(index, 1);
-              blocks.push({
-                x: Math.random() * (canvas.width - 40),
-                y: -50,
-                color: colors[Math.floor(Math.random() * colors.length)],
-                width: 30 + Math.random() * 20,
-                speed: 1 + Math.random() * (2 + Math.min(score/100, 3))
-              });
-            } else {
-              // Wrong color match
-              gameActive = false;
-              setTimeout(() => {
-                // Restart game after 2 seconds
-                score = 0;
-                gameActive = true;
-                blocks.length = 0;
-                createBlocks();
-              }, 2000);
-            }
-          }
-        }
-        
-        // If block goes off screen, reset it
-        if (block.y > canvas.height) {
-          block.y = -50;
-          block.x = Math.random() * (canvas.width - 40);
-        }
-      });
-      
-      // Instructions
+      // Game over or start message
       if (!gameActive) {
         ctx.fillStyle = 'rgba(0,0,0,0.7)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = '#ff0099';
         ctx.font = '24px Arial';
         ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 50);
         ctx.font = '18px Arial';
-        ctx.fillText('Restarting...', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('Click or press Space to restart', canvas.width / 2, canvas.height / 2);
+      } else if (!gameStarted) {
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00c3ff';
+        ctx.font = '22px Arial';
+        ctx.fillText('Neon Flapper', canvas.width / 2, canvas.height / 2 - 50);
+        ctx.font = '16px Arial';
+        ctx.fillStyle = 'white';
+        ctx.fillText('Click or press Space to start', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('Avoid hitting the pipes!', canvas.width / 2, canvas.height / 2 + 30);
       }
       
       requestAnimationFrame(draw);
     };
+    
+    // Draw neon grid background
+    function drawNeonGrid() {
+      const gridSize = 40;
+      ctx.strokeStyle = 'rgba(0, 195, 255, 0.2)'; // Neon blue with low opacity
+      ctx.lineWidth = 1;
+      
+      // Draw vertical lines
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      
+      // Draw horizontal lines
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
     
     // Resize handler
     const handleResize = () => {
@@ -132,6 +272,8 @@ const Hero: React.FC = () => {
     
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('keydown', handleKeyPress);
+      canvas.removeEventListener('click', handleClick);
     };
   }, []);
   
@@ -169,7 +311,7 @@ const Hero: React.FC = () => {
                   style={{ touchAction: "none" }}
                 ></canvas>
                 <div className="absolute top-0 left-0 p-4 text-white text-sm">
-                  <p>Match falling blocks with the color at the bottom!</p>
+                  <p>Click or press Space to play!</p>
                 </div>
               </div>
             </div>
