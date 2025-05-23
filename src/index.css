@@ -130,27 +130,26 @@
   border-style: solid;
   border-width: 4px;
   border-image: linear-gradient(45deg, #ff0099, #00c3ff) 1;
-  box-shadow: 0 0 8px #ff0099, 0 0 16px #00c3ff;
 }
 
 .pixel-canvas {
   image-rendering: pixelated;
 }
 
+/* Fixed pixel-btn by removing the clip-path property that was causing the cut corner */
 .pixel-btn {
-  clip-path: polygon(
-    0 0, 
-    100% 0, 
-    100% 80%, 
-    90% 100%, 
-    0 100%
-  );
+  @apply bg-neon-pink relative;
+  transition: all 0.3s ease;
+}
+
+.pixel-btn:hover {
+  @apply bg-neon-blue;
+  transform: translateY(-2px);
 }
 
 .pixelated-border {
   border: 2px solid;
   border-image: linear-gradient(to right, #ff0099, #00c3ff) 1;
-  box-shadow: 0 0 5px #ff0099, 0 0 10px #00c3ff;
 }
 
 /* Animate pixel elements */
