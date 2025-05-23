@@ -10,17 +10,16 @@ import {
 import { MapPin, ChevronDown } from "lucide-react";
 
 const locations = [
-  'Birmingham',
-  'Bristol',
-  'Durham',
-  'Edinburgh',
-  'Glasgow',
-  'Leicester',
-  'Liverpool',
-  'Manchester',
-  'Newcastle',
-  'Nottingham',
-  'Sheffield'
+  'Bangkok',
+  'Chiang Mai',
+  'Phuket',
+  'Pattaya',
+  'Hua Hin',
+  'Krabi',
+  'Koh Samui',
+  'Ayutthaya',
+  'Khon Kaen',
+  'Hat Yai'
 ];
 
 const LocationSelector: React.FC = () => {
