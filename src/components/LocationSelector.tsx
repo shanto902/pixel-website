@@ -28,13 +28,13 @@ const LocationSelector: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="flex items-center gap-2 text-white">
+        <Button variant="ghost" className="flex items-center gap-2 text-white pixelated-border">
           <MapPin size={16} className="text-neon-pink" />
           <span>{selectedLocation}</span>
           <ChevronDown size={16} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-dark border border-neon-blue">
+      <DropdownMenuContent className="w-56 bg-dark border border-neon-blue pixel-bg">
         {locations.map((location) => (
           <DropdownMenuItem 
             key={location}
